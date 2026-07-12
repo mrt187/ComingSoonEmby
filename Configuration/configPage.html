@@ -1,0 +1,264 @@
+<div is="emby-scroller"
+     class="view flex flex-direction-column scrollFrameY flex-grow"
+     data-horizontal="false"
+     data-forcescrollbar="true"
+     data-centerfocus="true"
+     data-bindheader="true"
+     data-controller="__plugin/ComingSoonConfigJS"
+     data-title="Coming Soon">
+
+    <div class="scrollSlider flex-grow flex-direction-column padded-left padded-left-page padded-right padded-top-page padded-bottom-page">
+
+        <style>
+            .csSection { margin-bottom: 0.5em; }
+            .csSection > summary {
+                cursor: pointer;
+                font-size: 1em;
+                font-weight: 600;
+                padding: 0.7em 1em;
+                list-style: none;
+                user-select: none;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #3a3a3c;
+                color: #eee;
+                border-radius: 6px;
+            }
+            .csSection > summary:hover { background: #48484a; }
+            .csSection > summary::-webkit-details-marker { display: none; }
+            .csSection > summary::after {
+                content: "▸";
+                font-size: 1.1em;
+                transition: transform 0.15s ease;
+            }
+            .csSection[open] > summary::after { transform: rotate(90deg); }
+            .csSection > .verticalSection { padding: 0.8em 0.2em 0.2em; }
+
+            .csHeaderRow { display: flex; align-items: center; justify-content: space-between; gap: 1em; margin-bottom: 0.8em; flex-wrap: wrap; }
+            .csHeaderButtons { display: flex; gap: 0.5em; }
+
+            .csListRow { border: 1px solid #444; border-radius: 6px; padding: 0.8em; margin-bottom: 0.6em; }
+            .csListRow .selectContainer { margin-top: 0.4em; }
+
+            .csModalBackdrop {
+                display: none;
+                position: fixed; inset: 0;
+                background: rgba(0,0,0,0.6);
+                z-index: 10000;
+                align-items: center;
+                justify-content: center;
+            }
+            .csModalBackdrop.open { display: flex; }
+            .csModal {
+                background: #1c1c1e;
+                color: #eee;
+                border-radius: 12px;
+                max-width: 520px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                padding: 1.5em;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            }
+            .csModal h2 { margin-top: 0; display: flex; align-items: center; gap: 0.4em; }
+            .csModal h3 { font-size: 1em; margin-bottom: 0.3em; color: #52b54b; }
+            .csModal ul { margin: 0 0 1em 1.2em; padding: 0; }
+            .csModal li { margin-bottom: 0.3em; font-size: 0.9em; }
+            .csModal .csCloseRow { text-align: right; margin-top: 1em; }
+            .csModal a { color: #6cc3ff; }
+
+            .csVersionBlock { margin-bottom: 0.8em; }
+            .csVersionBlock .csVersionNumber { font-weight: 600; color: #52b54b; margin-bottom: 0.2em; }
+            .csVersionBlock ul { margin: 0 0 0 1.2em; padding: 0; }
+            .csVersionBlock li { margin-bottom: 0.2em; font-size: 0.9em; }
+
+            .csLogModal { max-width: 800px; }
+            .csLogBox {
+                background: #000;
+                color: #ddd;
+                font-family: monospace;
+                font-size: 0.95em;
+                line-height: 1.4;
+                white-space: pre-wrap;
+                word-break: break-word;
+                border-radius: 6px;
+                padding: 0.8em;
+                max-height: 50vh;
+                overflow-y: auto;
+                margin: 0.5em 0 1em;
+            }
+            .csLogActions { display: flex; justify-content: flex-end; gap: 0.5em; flex-wrap: wrap; }
+        </style>
+
+        <div class="csHeaderRow">
+            <div id="CsPageDescription" class="fieldDescription" style="margin:0;"></div>
+            <div class="csHeaderButtons">
+                <button is="emby-button" type="button" id="BtnReadme" class="raised"></button>
+                <button is="emby-button" type="button" id="BtnLogs" class="raised"></button>
+                <button is="emby-button" type="button" id="BtnInfo" class="raised"></button>
+            </div>
+        </div>
+
+        <form id="ComingSoonConfigForm">
+
+            <div class="verticalSection">
+                <div class="inputContainer">
+                    <input is="emby-input" type="number" id="DaysAhead" min="1" max="365" />
+                    <div id="CsDaysAheadDescription" class="fieldDescription"></div>
+                </div>
+            </div>
+
+            <details class="csSection">
+                <summary id="CsSonarrSummary"></summary>
+                <div class="verticalSection">
+                    <label class="emby-checkbox-label">
+                        <input is="emby-checkbox" type="checkbox" id="SonarrEnabled" />
+                        <span id="CsSonarrEnabledLabel"></span>
+                    </label>
+                    <div id="CsSonarrEnabledDescription" class="fieldDescription"></div>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="text" id="SonarrUrl" />
+                        <div id="CsSonarrUrlDescription" class="fieldDescription"></div>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="password" id="SonarrApiKey" />
+                        <div id="CsSonarrApiKeyDescription" class="fieldDescription"></div>
+                    </div>
+                    <button is="emby-button" type="button" id="TestSonarr" class="raised"></button>
+                    <div id="SonarrTestResult" class="fieldDescription" style="display:none; margin-top:0.5em;"></div>
+                </div>
+            </details>
+
+            <details class="csSection">
+                <summary id="CsRadarrSummary"></summary>
+                <div class="verticalSection">
+                    <label class="emby-checkbox-label">
+                        <input is="emby-checkbox" type="checkbox" id="RadarrEnabled" />
+                        <span id="CsRadarrEnabledLabel"></span>
+                    </label>
+                    <div id="CsRadarrEnabledDescription" class="fieldDescription"></div>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="text" id="RadarrUrl" />
+                        <div id="CsRadarrUrlDescription" class="fieldDescription"></div>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="password" id="RadarrApiKey" />
+                        <div id="CsRadarrApiKeyDescription" class="fieldDescription"></div>
+                    </div>
+                    <button is="emby-button" type="button" id="TestRadarr" class="raised"></button>
+                    <div id="RadarrTestResult" class="fieldDescription" style="display:none; margin-top:0.5em;"></div>
+                </div>
+            </details>
+
+            <details class="csSection">
+                <summary id="CsListsSummary"></summary>
+                <div class="verticalSection">
+                    <div id="CsListsDescription" class="fieldDescription"></div>
+                    <div id="ListsContainer" style="margin-top:0.6em;"></div>
+                    <button is="emby-button" type="button" id="BtnAddList" class="raised" style="margin-top:0.4em;"></button>
+                </div>
+            </details>
+
+            <details class="csSection">
+                <summary id="CsTmdbSummary"></summary>
+                <div class="verticalSection">
+                    <div class="inputContainer">
+                        <input is="emby-input" type="password" id="TmdbApiKey" />
+                        <div id="CsTmdbApiKeyDescription" class="fieldDescription"></div>
+                    </div>
+                    <label class="emby-checkbox-label">
+                        <input is="emby-checkbox" type="checkbox" id="DownloadTrailersLocally" />
+                        <span id="CsDownloadTrailersLabel"></span>
+                    </label>
+                    <div id="CsDownloadTrailersDescription" class="fieldDescription"></div>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="text" id="YtDlpPath" />
+                        <div id="CsYtDlpDescription" class="fieldDescription"></div>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="text" id="FfmpegPath" />
+                        <div id="CsFfmpegDescription" class="fieldDescription"></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="csSection">
+                <summary id="CsLanguageSummary"></summary>
+                <div class="verticalSection">
+                    <div class="selectContainer">
+                        <select is="emby-select" id="Language">
+                            <option value="English">English</option>
+                            <option value="German">Deutsch (German)</option>
+                        </select>
+                        <div id="CsLanguageDescription" class="fieldDescription"></div>
+                    </div>
+                    <div class="selectContainer">
+                        <select is="emby-select" id="BadgePosition">
+                            <option value="TopLeft"></option>
+                            <option value="TopRight"></option>
+                            <option value="BottomLeft"></option>
+                            <option value="BottomRight"></option>
+                        </select>
+                        <div id="CsBadgePositionDescription" class="fieldDescription"></div>
+                    </div>
+                </div>
+            </details>
+
+            <div class="verticalSection" style="margin-top:1em;">
+                <button is="emby-button" type="submit" class="raised button-submit block">
+                    <span id="CsSaveButtonLabel"></span>
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+    <div id="CsReadmeModalBackdrop" class="csModalBackdrop">
+        <div class="csModal">
+            <h2 id="CsReadmeHeading"></h2>
+            <h3 id="CsReadmeHowHeading"></h3>
+            <p id="CsReadmeHowText" style="font-size:0.9em;"></p>
+            <h3 id="CsReadmeStorageHeading"></h3>
+            <p id="CsReadmeStorageText" style="font-size:0.9em;"></p>
+            <code id="CsReadmeStoragePath" style="display:block;overflow-wrap:anywhere;margin-bottom:1em;">{PluginsPath}/ComingSoon/data/library-&lt;List Name&gt;/</code>
+            <h3 id="CsReadmeVersionsHeading"></h3>
+            <p id="CsReadmeVersionsText" style="font-size:0.9em;"></p>
+            <div class="csCloseRow">
+                <button is="emby-button" type="button" id="BtnCloseReadme" class="raised"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="CsInfoModalBackdrop" class="csModalBackdrop">
+        <div class="csModal">
+            <h2 id="CsInfoHeading">ℹ️ Coming Soon</h2>
+
+            <h3 id="CsTmdbInfoHeading">TMDB API Key</h3>
+            <p id="CsTmdbInfoText" style="font-size:0.9em;"></p>
+            <p style="font-size:0.9em;">
+                <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">themoviedb.org/settings/api</a>
+            </p>
+
+            <h3 id="CsReleaseNotesHeading">Release Notes</h3>
+            <div id="CsReleaseNotes"></div>
+
+            <div class="csCloseRow">
+                <button is="emby-button" type="button" id="BtnCloseInfo" class="raised"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="CsLogModalBackdrop" class="csModalBackdrop">
+        <div class="csModal csLogModal">
+            <h2 id="CsLogHeading">📋 Coming Soon Logs</h2>
+            <div id="CsLogDescription" class="fieldDescription" style="margin-bottom:0.5em;"></div>
+            <pre id="CsLogBox" class="csLogBox"></pre>
+            <div class="csLogActions">
+                <button is="emby-button" type="button" id="BtnOpenLogsNewTab" class="raised"></button>
+                <button is="emby-button" type="button" id="BtnRefreshLogs" class="raised"></button>
+                <button is="emby-button" type="button" id="BtnCloseLogs" class="raised"></button>
+            </div>
+        </div>
+    </div>
+</div>

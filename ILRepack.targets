@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- ILRepack -->
+  <!-- Named exactly "ILRepack.targets" so ILRepack.Lib.MSBuild.Task uses THIS instead of its
+       own built-in default merge target (see comment in ComingSoonPlugin.csproj). -->
+  <Target Name="ILRepacker" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
+      <InputAssemblies Include="$(OutputPath)SixLabors.ImageSharp.dll" />
+      <InputAssemblies Include="$(OutputPath)SixLabors.ImageSharp.Drawing.dll" />
+      <InputAssemblies Include="$(OutputPath)SixLabors.Fonts.dll" />
+      <InputAssemblies Include="$(OutputPath)Microsoft.Extensions.Logging.Abstractions.dll" />
+      <InputAssemblies Include="$(OutputPath)Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+    </ItemGroup>
+
+    <ILRepack
+      Parallel="true"
+      DebugInfo="true"
+      Internalize="true"
+      InputAssemblies="@(InputAssemblies)"
+      TargetKind="Dll"
+      OutputFile="$(OutputPath)\$(AssemblyName).dll"
+      LibraryPath="$(MSBuildProjectDirectory)\lib"
+    />
+  </Target>
+  <!-- /ILRepack -->
+</Project>

@@ -1,0 +1,11 @@
+.DS_Store
+.claude/
+bin/
+obj/
+*.user
+*.suo
+*.bak
+deploy.sh
+
+# Emby server SDK assemblies are copied from a local Emby installation.
+lib/*.dll

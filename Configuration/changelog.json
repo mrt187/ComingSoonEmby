@@ -1,0 +1,88 @@
+[
+  {
+    "Version": "1.0.0",
+    "Notes": [
+      "Keeps existing movies or episodes when their Sonarr/Radarr source is temporarily unavailable.",
+      "Explicitly protects plugin HTTP endpoints and validates connection-test URLs.",
+      "Adds a concise Readme dialog with storage, workflow and supported-version information.",
+      "First public release."
+    ]
+  },
+  { "version": "0.9.2.0", "notes": [
+    "Status badge now reflects the release type: IN CINEMAS, ON DISC (physical) or DIGITAL.",
+    "New setting to place the status badge in any of the four corners (the date stays bottom-right; the badge sits above it when they share that corner).",
+    "The info window now shows only the newest release note."
+  ] },
+  { "version": "0.9.0.0", "notes": [
+    "Bigger, more readable poster/backdrop badges (existing entries are re-rendered automatically on the next refresh).",
+    "\"Days ahead\" can now go up to 365 days (was capped at 120)."
+  ] },
+  { "version": "0.8.2.0", "notes": [
+    "Fixed the list of rows growing/duplicating on every plugin update or restart (config default no longer appended by the serializer). Existing duplicates are cleaned up automatically."
+  ] },
+  { "version": "0.8.1.0", "notes": [
+    "Built against Emby 4.9.5.0 so the plugin also loads on the current stable, not only on 4.10 beta (compile against the lowest supported version; it rolls forward to newer ones)."
+  ] },
+  { "version": "0.8.0.0", "notes": [
+    "Trailers are now local trailer extras, so Emby shows its native \"Trailer\" button; the main entry stays a short placeholder.",
+    "Removed the placeholder-marker machinery and some unused fields."
+  ] },
+  { "version": "0.7.0.0", "notes": [
+    "The overview is now fetched in the plugin's language too, not just the badges (via the library's preferred metadata language).",
+    "Series trailers are fetched once per series and reused for every episode instead of searching per episode.",
+    "A shared trailer is now downloaded once and copied, not re-downloaded per folder."
+  ] },
+  { "version": "0.6.0.0", "notes": [
+    "Language switch now takes effect on the next refresh - no need to delete and recreate the libraries.",
+    "Every settings field now has a short description explaining what it's for.",
+    "Info screen shows the TMDB key help first, then the changelog."
+  ] },
+  { "version": "0.5.3.0", "notes": [
+    "Trailers now download as a ready-to-play stream (up to 720p) needing no ffmpeg - fixes trailers never appearing on images without a usable ffmpeg.",
+    "Leftover download fragments are cleaned up when a merge fails.",
+    "ffmpeg is now optional and only used if you set an explicit path to a modern build."
+  ] },
+  { "version": "0.5.2.0", "notes": [
+    "Attempted ffmpeg path resolution via Emby's startup argument (superseded by 0.5.3.0)."
+  ] },
+  { "version": "0.5.1.0", "notes": [
+    "Fixed yt-dlp auto-download picking the Python-dependent build instead of the correct standalone binary.",
+    "Fixed a GLIBC conflict where Emby's own bundled libc broke yt-dlp (and other subprocesses) entirely on some images."
+  ] },
+  { "version": "0.5.0.0", "notes": [
+    "Poster/backdrop badges are now re-rendered on every refresh, not just once - date/language/list changes show up immediately.",
+    "Fixed placeholder trailers never being replaced by a real one once yt-dlp becomes available.",
+    "\"In Cinemas\" badge also added to the backdrop/hero image.",
+    "Blocked Emby's own online image fetchers for Coming Soon libraries so a later scan can't silently replace our badged images.",
+    "Bigger, more readable log viewer, plus an \"open in new tab\" option.",
+    "Release notes now list every change per version instead of one squashed line.",
+    "API key fields explain where to find the key."
+  ] },
+  { "version": "0.4.1.0", "notes": [
+    "Portable yt-dlp/ffmpeg resolution: uses Emby's own ffmpeg automatically, auto-downloads yt-dlp if missing - works on any Docker image."
+  ] },
+  { "version": "0.4.0.0", "notes": [
+    "Log viewer on the settings page.",
+    "Backdrop images for the home-screen hero.",
+    "\"In Cinemas\" poster badge.",
+    "Full German translation of the settings page.",
+    "Daily 00:15 default schedule instead of hourly."
+  ] },
+  { "version": "0.3.0.0", "notes": [
+    "Multiple lists, each its own home-screen row.",
+    "Smaller badge text.",
+    "English/German language for badges, dates and descriptions.",
+    "Restructured settings page (collapsed sections, Info button)."
+  ] },
+  { "version": "0.2.2.0", "notes": [
+    "Cast/crew now fetched by Emby's own metadata provider.",
+    "Fixed a command-injection risk in trailer downloads."
+  ] },
+  { "version": "0.2.1.0", "notes": [
+    "Writes real poster/video/NFO files so Emby's own scanner indexes them."
+  ] },
+  { "version": "0.2.0.0", "notes": [
+    "Redesigned poster badges (rounded pills, centered text, green UPCOMING badge).",
+    "Coming Soon library auto-created and kept in sync every refresh."
+  ] }
+]

@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Must match the target Emby Server's own runtime (Dashboard > About). -->
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>ComingSoonPlugin</AssemblyName>
+    <RootNamespace>ComingSoonPlugin</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Bump on every deploy - the only way to tell from Dashboard/logs whether the server
+         picked up a new build. -->
+    <Version>1.0.0.0</Version>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- From the Emby Server install directory, not NuGet.org - adjust HintPath to your setup. -->
+    <Reference Include="MediaBrowser.Common">
+      <HintPath>lib\MediaBrowser.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MediaBrowser.Controller">
+      <HintPath>lib\MediaBrowser.Controller.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MediaBrowser.Model">
+      <HintPath>lib\MediaBrowser.Model.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Pinned to patched versions (GHSA-2cmq-823j-5qj8, GHSA-rxmq-m78w-7wmc fixed as of Core
+         3.1.11). ImageSharp.Drawing 3.0.0 requires Core >= 4.0.0 - don't bump Drawing past 2.1.x
+         without also moving Core to 4.x. -->
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Configuration\configPage.html" />
+    <EmbeddedResource Include="Configuration\configPage.js" />
+    <EmbeddedResource Include="Configuration\changelog.json" />
+    <EmbeddedResource Include="thumb.png" />
+    <EmbeddedResource Include="Assets\dummy.mp4" LogicalName="ComingSoonPlugin.Assets.dummy.mp4" />
+    <EmbeddedResource Include="Fonts\Roboto-Bold.ttf" LogicalName="ComingSoonPlugin.Fonts.Roboto-Bold.ttf" />
+  </ItemGroup>
+
+  <!-- Merges every dependency DLL into ComingSoonPlugin.dll so only one file needs to be
+       deployed. The actual merge Target lives in ILRepack.targets (project root) - the package
+       auto-imports its own default merge target on reference, and a second one defined inline
+       here would run alongside it, causing "duplicate type" errors. -->
+  <ItemGroup>
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
