@@ -40,3 +40,5 @@ The generated libraries are stored below:
 
 Each entry contains its poster, backdrop, NFO metadata and a short placeholder video. When local
 trailers are enabled, the trailer is stored in the entry's `trailers` folder.
+
+<sub>Developed with the assistance of AI.</sub>
