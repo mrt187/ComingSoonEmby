@@ -9,8 +9,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Bump on every deploy - the only way to tell from Dashboard/logs whether the server
          picked up a new build. -->
-    <Version>1.0.0.0</Version>
+    <Version>1.0.1.0</Version>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <!-- No PDB in the shipped DLL: a local build otherwise embeds an absolute pdb path
+       (leaking the build machine's username/folder layout) into the PE debug directory. -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <ItemGroup>

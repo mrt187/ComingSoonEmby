@@ -1,5 +1,11 @@
 [
   {
+    "Version": "1.0.1",
+    "Notes": [
+      "Build hardening: the shipped DLL no longer embeds an absolute build path (Release builds now drop the PDB reference)."
+    ]
+  },
+  {
     "Version": "1.0.0",
     "Notes": [
       "Keeps existing movies or episodes when their Sonarr/Radarr source is temporarily unavailable.",
