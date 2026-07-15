@@ -1,5 +1,11 @@
 [
   {
+    "Version": "1.2.0",
+    "Notes": [
+      "Movie dates now prefer the configured region and fall back to a verified US date, visibly marked with a US badge."
+    ]
+  },
+  {
     "Version": "1.1.3",
     "Notes": [
       "Episode cards now keep separate Emby identities instead of being collapsed when they belong to the same series.",

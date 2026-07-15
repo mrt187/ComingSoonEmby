@@ -23,7 +23,7 @@ namespace ComingSoonPlugin.ScheduledTasks
     {
         // Bump when the burned-in badge appearance changes, so the next refresh forces Emby to
         // re-read the re-rendered poster/backdrop images for items already in the library.
-        private const int BadgeRenderVersion = 2;
+        private const int BadgeRenderVersion = 3;
 
         private readonly ILogger _logger;
         private readonly IProviderManager _providerManager;
@@ -73,7 +73,7 @@ namespace ComingSoonPlugin.ScheduledTasks
             if (string.IsNullOrWhiteSpace(config.TmdbApiKey))
             {
                 _logger.LogInformation(
-                    "Coming Soon: no TMDB API key configured - regional movie dates and local trailer download unavailable; Radarr dates will be used.");
+                    "Coming Soon: no TMDB API key configured - regional movie dates, US fallback dates and local trailer download unavailable; Radarr dates will be used.");
             }
 
             var radarrService = new RadarrService(SharedHttpClient, _logger);
@@ -179,11 +179,31 @@ namespace ComingSoonPlugin.ScheduledTasks
                         }
 
                         var resolvedDate = RadarrService.ResolveDate(movie, list.MovieDateType, regionalDates);
+                        var dateRegionLabel = (string?)null;
                         if (resolvedDate is null && regionalDates is not null)
                         {
-                            _logger.LogDebug(
-                                "Coming Soon: no {DateType} date for '{Title}' in region {Region}; omitted from list '{List}'",
-                                list.MovieDateType, movie.Title, NormalizeRegion(list.ReleaseDateRegion), list.Name);
+                            const string fallbackRegion = "US";
+                            var fallbackCacheKey = $"{movie.TmdbId!.Value}:{fallbackRegion}";
+                            if (!regionalReleaseDateCache.TryGetValue(fallbackCacheKey, out var fallbackDates))
+                            {
+                                fallbackDates = await tmdbService.GetMovieReleaseDatesAsync(
+                                    movie.TmdbId.Value, fallbackRegion, cancellationToken).ConfigureAwait(false);
+                                regionalReleaseDateCache[fallbackCacheKey] = fallbackDates;
+                            }
+
+                            // A null result means the US request itself failed. Do not let
+                            // ResolveDate interpret that as permission to use an unverified
+                            // Radarr date and then incorrectly label it as US.
+                            resolvedDate = fallbackDates is null
+                                ? null
+                                : RadarrService.ResolveDate(movie, list.MovieDateType, fallbackDates);
+                            if (resolvedDate is not null)
+                            {
+                                dateRegionLabel = fallbackRegion;
+                                _logger.LogDebug(
+                                    "Coming Soon: using US {DateType} fallback for '{Title}' in list '{List}'",
+                                    list.MovieDateType, movie.Title, list.Name);
+                            }
                         }
 
                         if (resolvedDate is null || resolvedDate.Value.Date < now || resolvedDate.Value.Date > windowEnd)
@@ -193,6 +213,7 @@ namespace ComingSoonPlugin.ScheduledTasks
 
                         var clone = movie.Clone();
                         clone.Date = resolvedDate.Value;
+                        clone.DateRegionLabel = dateRegionLabel;
                         itemsForList.Add(clone);
                     }
                 }
@@ -319,7 +340,8 @@ namespace ComingSoonPlugin.ScheduledTasks
             {
                 await imageOverlayService.DownloadAndBadgeAsync(
                     posterUrl, calendarItem.Date, entryDir, cancellationToken,
-                    calendarItem.SeasonNumber, calendarItem.EpisodeNumber, badgeKind)
+                    calendarItem.SeasonNumber, calendarItem.EpisodeNumber, badgeKind,
+                    calendarItem.DateRegionLabel)
                     .ConfigureAwait(false);
             }
 

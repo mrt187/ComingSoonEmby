@@ -26,6 +26,9 @@ namespace ComingSoonPlugin.Models
         /// </summary>
         public DateTime Date { get; set; }
 
+        /// <summary>Shown beside the date when a regional fallback (currently US) was used.</summary>
+        public string? DateRegionLabel { get; set; }
+
         public string Overview { get; set; } = string.Empty;
 
         public int? TmdbId { get; set; }

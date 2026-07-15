@@ -96,7 +96,7 @@ namespace ComingSoonPlugin.Services
                 if (country?.ReleaseDates is not { Count: > 0 })
                 {
                     _logger.LogDebug(
-                        "TMDB has no release dates for movie {TmdbId} in region {Region}; the movie will be omitted from regional lists",
+                        "TMDB has no release dates for movie {TmdbId} in region {Region}",
                         tmdbId, region);
                     return new RegionalReleaseDates();
                 }

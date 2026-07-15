@@ -61,7 +61,8 @@ namespace ComingSoonPlugin.Services
             CancellationToken cancellationToken,
             int? seasonNumber = null,
             int? episodeNumber = null,
-            ReleaseBadgeKind badgeKind = ReleaseBadgeKind.Upcoming)
+            ReleaseBadgeKind badgeKind = ReleaseBadgeKind.Upcoming,
+            string? dateRegionLabel = null)
         {
             Directory.CreateDirectory(outputDirectory);
             var sourcePath = Path.Combine(outputDirectory, ".poster-source.jpg");
@@ -82,7 +83,12 @@ namespace ComingSoonPlugin.Services
                 {
                     // The date badge sits in the bottom-right corner. If the status stack shares
                     // that corner, it starts above the date instead of overlapping it.
-                    var dateHeight = DrawPill(image, font, FormatDate(releaseDate), BadgeCorner.BottomRight, 0f, DateBadgeBackground);
+                    var dateText = FormatDate(releaseDate);
+                    if (!string.IsNullOrWhiteSpace(dateRegionLabel))
+                    {
+                        dateText += $" · {dateRegionLabel.Trim().ToUpperInvariant()}";
+                    }
+                    var dateHeight = DrawPill(image, font, dateText, BadgeCorner.BottomRight, 0f, DateBadgeBackground);
                     var stackOffset = _badgePosition == BadgeCorner.BottomRight ? dateHeight + Gap(image) : 0f;
 
                     var statusHeight = DrawPill(image, font, StatusText(badgeKind), _badgePosition, stackOffset, UpcomingGreen);
