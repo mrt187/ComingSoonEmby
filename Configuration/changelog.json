@@ -1,5 +1,13 @@
 [
   {
+    "Version": "1.1.0",
+    "Notes": [
+      "Adds a configurable movie release region to every list (Germany by default).",
+      "Uses country-specific TMDB cinema, digital and physical release dates with per-field Radarr fallback.",
+      "Caches every movie/region lookup for the duration of a refresh so shared movies are only requested once."
+    ]
+  },
+  {
     "Version": "1.0.1",
     "Notes": [
       "Build hardening: the shipped DLL no longer embeds an absolute build path (Release builds now drop the PDB reference)."

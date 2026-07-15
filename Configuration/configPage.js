@@ -16,7 +16,7 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
             readmeButton: "📖 Readme",
             readmeHeading: "📖 How it works",
             readmeHowHeading: "What the plugin does",
-            readmeHowText: "The scheduled task reads upcoming movies from Radarr and episodes from Sonarr. It creates one normal Emby library for every configured list and refreshes it automatically.",
+            readmeHowText: "The scheduled task reads upcoming movies from Radarr and episodes from Sonarr. For movies, TMDB supplies release dates for the country selected in each list. It creates one normal Emby library for every configured list and refreshes it automatically.",
             readmeStorageHeading: "Where files are stored",
             readmeStorageText: "Each entry is stored inside the plugin data folder with its poster, backdrop, NFO file, short placeholder video and, when enabled, a local trailer. Removing an expired entry removes its folder on the next successful refresh.",
             readmeVersionsHeading: "Supported Emby versions",
@@ -43,10 +43,13 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
             includeTvLabel: "Include TV shows",
             movieDateLabel: "Movie date",
             movieDateOptions: { Digital: "Digital Release", Physical: "Physical Release", InCinemas: "In Cinemas", Earliest: "Earliest of all three" },
+            releaseRegionLabel: "Movie release region",
+            releaseRegionDescription: "Uses TMDB dates for this country. If no regional date or TMDB key is available, the Radarr date is used.",
+            releaseRegionOptions: { DE: "Germany", AT: "Austria", CH: "Switzerland", US: "United States", GB: "United Kingdom" },
             removeButton: "Remove",
             tmdbSummary: "TMDB & Trailers",
-            tmdbApiKeyLabel: "API Key (optional - only needed for local trailer download)",
-            tmdbApiKeyDescription: "Overview and poster still work without this, sourced from Emby's own provider / Sonarr / Radarr. Free key at themoviedb.org/settings/api.",
+            tmdbApiKeyLabel: "API Key (optional - needed for regional movie dates and local trailers)",
+            tmdbApiKeyDescription: "Enables country-specific movie dates and local trailer downloads. Without it, movie dates fall back to Radarr. Free key at themoviedb.org/settings/api.",
             downloadTrailersLabel: "Download trailers locally (recommended for Apple TV / native clients)",
             downloadTrailersDescription: "Downloads the trailer as a real file so it plays inside Emby instead of opening YouTube. Needs a TMDB API key.",
             ytDlpPathLabel: "yt-dlp path",
@@ -66,8 +69,8 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
             infoHeading: "ℹ️ Coming Soon",
             releaseNotesHeading: "Release Notes",
             tmdbHeading: "TMDB API Key",
-            tmdbInfo: "Optional. Only used to download trailers locally via yt-dlp (so playback stays " +
-                "inside Emby instead of opening YouTube), and as a fallback for the overview/poster if " +
+            tmdbInfo: "Optional. Used for country-specific movie release dates, local trailers via yt-dlp " +
+                "(so playback stays inside Emby instead of opening YouTube), and as a fallback for the overview/poster if " +
                 "Emby's own metadata provider isn't configured. Cast/crew is normally fetched by Emby " +
                 "itself once an item is scanned.",
             close: "Close",
@@ -86,7 +89,7 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
             readmeButton: "📖 Readme",
             readmeHeading: "📖 So funktioniert es",
             readmeHowHeading: "Was das Plugin macht",
-            readmeHowText: "Die geplante Aufgabe liest kommende Filme aus Radarr und Episoden aus Sonarr. Für jede eingerichtete Liste wird eine normale Emby-Bibliothek erstellt und automatisch aktualisiert.",
+            readmeHowText: "Die geplante Aufgabe liest kommende Filme aus Radarr und Episoden aus Sonarr. Für Filme liefert TMDB die Veröffentlichungstermine des in der jeweiligen Liste gewählten Landes. Für jede eingerichtete Liste wird eine normale Emby-Bibliothek erstellt und automatisch aktualisiert.",
             readmeStorageHeading: "Wo die Dateien gespeichert werden",
             readmeStorageText: "Jeder Eintrag liegt im Datenordner des Plugins – mit Poster, Hintergrundbild, NFO-Datei, kurzem Platzhaltervideo und, falls aktiviert, einem lokalen Trailer. Abgelaufene Einträge werden nach der nächsten erfolgreichen Aktualisierung entfernt.",
             readmeVersionsHeading: "Unterstützte Emby-Versionen",
@@ -113,10 +116,13 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
             includeTvLabel: "Serien einschließen",
             movieDateLabel: "Filmdatum",
             movieDateOptions: { Digital: "Digitale Veröffentlichung", Physical: "Physische Veröffentlichung", InCinemas: "Kinostart", Earliest: "Frühestes aller drei" },
+            releaseRegionLabel: "Veröffentlichungsregion für Filme",
+            releaseRegionDescription: "Verwendet TMDB-Termine für dieses Land. Fehlt der regionale Termin oder TMDB-Schlüssel, wird das Radarr-Datum verwendet.",
+            releaseRegionOptions: { DE: "Deutschland", AT: "Österreich", CH: "Schweiz", US: "USA", GB: "Vereinigtes Königreich" },
             removeButton: "Entfernen",
             tmdbSummary: "TMDB & Trailer",
-            tmdbApiKeyLabel: "API-Schlüssel (optional - nur für lokalen Trailer-Download nötig)",
-            tmdbApiKeyDescription: "Beschreibung und Poster funktionieren auch ohne diesen Schlüssel, über Emby's eigenen Provider / Sonarr / Radarr. Kostenloser Schlüssel unter themoviedb.org/settings/api.",
+            tmdbApiKeyLabel: "API-Schlüssel (optional - für regionale Filmtermine und lokale Trailer)",
+            tmdbApiKeyDescription: "Aktiviert länderspezifische Filmtermine und lokale Trailer-Downloads. Ohne Schlüssel werden die Radarr-Termine verwendet. Kostenloser Schlüssel unter themoviedb.org/settings/api.",
             downloadTrailersLabel: "Trailer lokal herunterladen (empfohlen für Apple TV / native Clients)",
             downloadTrailersDescription: "Lädt den Trailer als echte Datei herunter, damit er in Emby abgespielt wird statt YouTube zu öffnen. Benötigt einen TMDB-API-Schlüssel.",
             ytDlpPathLabel: "yt-dlp-Pfad",
@@ -136,8 +142,8 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
             infoHeading: "ℹ️ Coming Soon",
             releaseNotesHeading: "Versionshinweise",
             tmdbHeading: "TMDB API-Schlüssel",
-            tmdbInfo: "Optional. Wird nur für den lokalen Trailer-Download über yt-dlp benötigt (damit " +
-                "die Wiedergabe in Emby bleibt statt YouTube zu öffnen), sowie als Fallback für " +
+            tmdbInfo: "Optional. Wird für länderspezifische Filmtermine, lokale Trailer über yt-dlp " +
+                "(damit die Wiedergabe in Emby bleibt statt YouTube zu öffnen) sowie als Fallback für " +
                 "Beschreibung/Poster, falls Emby's eigener Metadaten-Provider nicht konfiguriert ist. " +
                 "Cast/Crew werden normalerweise von Emby selbst beim Scannen geladen.",
             close: "Schließen",
@@ -362,7 +368,7 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
         // inserted rows get upgraded the same way as elements present at initial page load.
 
         function defaultList() {
-            return { Name: "Coming Soon", IncludeMovies: true, MovieDateType: "Digital", IncludeTvShows: true };
+            return { Name: "Coming Soon", IncludeMovies: true, MovieDateType: "Digital", ReleaseDateRegion: "DE", IncludeTvShows: true };
         }
 
         function buildDateTypeSelect(value) {
@@ -376,6 +382,20 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
                 select.appendChild(opt);
             });
             select.value = value;
+            return select;
+        }
+
+        function buildReleaseRegionSelect(value) {
+            var s = t();
+            var select = document.createElement("select", { is: "emby-select" });
+            select.setAttribute("label", s.releaseRegionLabel);
+            ["DE", "AT", "CH", "US", "GB"].forEach(function (key) {
+                var opt = document.createElement("option");
+                opt.value = key;
+                opt.textContent = s.releaseRegionOptions[key];
+                select.appendChild(opt);
+            });
+            select.value = value || "DE";
             return select;
         }
 
@@ -417,9 +437,22 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
                 dateWrap.appendChild(dateSelect);
                 row.appendChild(dateWrap);
 
+                var regionWrap = document.createElement('div');
+                regionWrap.className = 'selectContainer';
+                regionWrap.style.display = list.IncludeMovies ? '' : 'none';
+                var regionSelect = buildReleaseRegionSelect(list.ReleaseDateRegion);
+                regionSelect.addEventListener('change', function () { list.ReleaseDateRegion = regionSelect.value; });
+                regionWrap.appendChild(regionSelect);
+                var regionDescription = document.createElement('div');
+                regionDescription.className = 'fieldDescription';
+                regionDescription.textContent = s.releaseRegionDescription;
+                regionWrap.appendChild(regionDescription);
+                row.appendChild(regionWrap);
+
                 moviesCheckbox.addEventListener('change', function () {
                     list.IncludeMovies = moviesCheckbox.checked;
                     dateWrap.style.display = list.IncludeMovies ? '' : 'none';
+                    regionWrap.style.display = list.IncludeMovies ? '' : 'none';
                 });
 
                 var tvLabel = document.createElement('label');
@@ -487,6 +520,7 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
                         Name: l.Name || 'Coming Soon',
                         IncludeMovies: l.IncludeMovies !== false,
                         MovieDateType: l.MovieDateType || 'Digital',
+                        ReleaseDateRegion: l.ReleaseDateRegion || 'DE',
                         IncludeTvShows: l.IncludeTvShows !== false
                     };
                 }).filter(function (l) {
@@ -522,6 +556,7 @@ define(["emby-input", "emby-button", "emby-checkbox", "emby-select"], function (
                     Name: (l.Name || 'Coming Soon').trim() || 'Coming Soon',
                     IncludeMovies: l.IncludeMovies,
                     MovieDateType: l.MovieDateType,
+                    ReleaseDateRegion: l.ReleaseDateRegion || 'DE',
                     IncludeTvShows: l.IncludeTvShows
                 };
             });

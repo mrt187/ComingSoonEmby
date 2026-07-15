@@ -8,18 +8,20 @@ from Radarr and Sonarr.
 - Emby Server 4.9.5 Stable
 - Emby Server 4.10 Beta
 
-Version 1.0.0 is built against Emby 4.9.5 and tested on Emby 4.10 Beta.
+Version 1.1.0 is built against Emby 4.9.5 and tested on Emby 4.10 Beta.
 
 ## How it works
 
 1. The scheduled task reads upcoming movies from Radarr and episodes from Sonarr.
-2. Poster, description and release information are collected and a release badge is added.
-3. Every configured list becomes a normal Emby library and can be placed on the home screen.
-4. Expired entries are removed after the next successful refresh. If Sonarr or Radarr is briefly
+2. For movies, TMDB supplies cinema, digital or physical release dates for the country selected
+   in each list. Germany is the default. Missing regional dates fall back to Radarr.
+3. Poster, description and release information are collected and a release badge is added.
+4. Every configured list becomes a normal Emby library and can be placed on the home screen.
+5. Expired entries are removed after the next successful refresh. If Sonarr or Radarr is briefly
    unavailable, existing entries from that source are kept.
 
-Local trailer downloads are optional and require a TMDB API key. Without a TMDB key, the basic
-Coming Soon libraries still work.
+A TMDB API key enables regional movie dates and optional local trailer downloads. Without a TMDB
+key, the basic Coming Soon libraries still work and movie dates come from Radarr.
 
 ## Installation
 

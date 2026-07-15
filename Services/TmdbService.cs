@@ -60,6 +60,83 @@ namespace ComingSoonPlugin.Services
         }
 
         /// <summary>
+        /// Returns the earliest relevant movie dates for one country. TMDB release types are:
+        /// 2=limited theatrical, 3=theatrical, 4=digital and 5=physical. A regular theatrical
+        /// date is preferred; limited theatrical is only used when no regular date exists.
+        /// </summary>
+        public async Task<RegionalReleaseDates?> GetMovieReleaseDatesAsync(
+            int tmdbId, string countryCode, CancellationToken cancellationToken)
+        {
+            if (!HasApiKey)
+            {
+                return null;
+            }
+
+            var region = NormalizeCountryCode(countryCode);
+            var url = $"{BaseUrl}/movie/{tmdbId}/release_dates?api_key={_apiKey}";
+
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning(
+                        "TMDB release-date lookup failed for movie {TmdbId}, region {Region}: {Status}",
+                        tmdbId, region, response.StatusCode);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                var result = JsonSerializer.Deserialize<TmdbReleaseDatesResponse>(json, JsonOptions);
+                var country = result?.Results?.FirstOrDefault(r =>
+                    string.Equals(r.CountryCode, region, StringComparison.OrdinalIgnoreCase));
+
+                if (country?.ReleaseDates is not { Count: > 0 })
+                {
+                    _logger.LogDebug(
+                        "TMDB has no release dates for movie {TmdbId} in region {Region}; Radarr dates will be used",
+                        tmdbId, region);
+                    return new RegionalReleaseDates();
+                }
+
+                var regularCinema = EarliestDate(country.ReleaseDates, 3);
+                var limitedCinema = EarliestDate(country.ReleaseDates, 2);
+
+                return new RegionalReleaseDates
+                {
+                    InCinemas = regularCinema ?? limitedCinema,
+                    Digital = EarliestDate(country.ReleaseDates, 4),
+                    Physical = EarliestDate(country.ReleaseDates, 5)
+                };
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(
+                    ex, "TMDB release-date lookup failed for movie {TmdbId}, region {Region}; Radarr dates will be used",
+                    tmdbId, region);
+                return null;
+            }
+        }
+
+        private static DateTime? EarliestDate(IEnumerable<TmdbReleaseDateDto> dates, int type) =>
+            dates.Where(d => d.Type == type && d.ReleaseDate.HasValue)
+                .Select(d => d.ReleaseDate!.Value.Date)
+                .Cast<DateTime?>()
+                .Min();
+
+        private static string NormalizeCountryCode(string? countryCode)
+        {
+            var normalized = (countryCode ?? string.Empty).Trim().ToUpperInvariant();
+            return normalized.Length == 2 && normalized.All(char.IsLetter) ? normalized : "DE";
+        }
+
+        /// <summary>
         /// Sonarr only gives us a tvdbId, but TMDB's /tv endpoints are keyed by TMDB's own id.
         /// This bridges the gap via TMDB's /find endpoint. Returns null if TMDB has no match.
         /// </summary>
@@ -193,6 +270,28 @@ namespace ComingSoonPlugin.Services
         private class TmdbTvResultDto
         {
             public int Id { get; set; }
+        }
+
+        private class TmdbReleaseDatesResponse
+        {
+            public List<TmdbCountryReleaseDatesDto>? Results { get; set; }
+        }
+
+        private class TmdbCountryReleaseDatesDto
+        {
+            [JsonPropertyName("iso_3166_1")]
+            public string? CountryCode { get; set; }
+
+            [JsonPropertyName("release_dates")]
+            public List<TmdbReleaseDateDto>? ReleaseDates { get; set; }
+        }
+
+        private class TmdbReleaseDateDto
+        {
+            [JsonPropertyName("release_date")]
+            public DateTime? ReleaseDate { get; set; }
+
+            public int Type { get; set; }
         }
     }
 }

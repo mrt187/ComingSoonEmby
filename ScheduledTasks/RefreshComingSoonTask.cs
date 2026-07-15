@@ -72,7 +72,8 @@ namespace ComingSoonPlugin.ScheduledTasks
 
             if (string.IsNullOrWhiteSpace(config.TmdbApiKey))
             {
-                _logger.LogInformation("Coming Soon: no TMDB API key configured - local trailer download unavailable.");
+                _logger.LogInformation(
+                    "Coming Soon: no TMDB API key configured - regional movie dates and local trailer download unavailable; Radarr dates will be used.");
             }
 
             var radarrService = new RadarrService(SharedHttpClient, _logger);
@@ -135,6 +136,10 @@ namespace ComingSoonPlugin.ScheduledTasks
             // includes it - avoids redundant TMDB calls for a movie appearing in multiple lists.
             var metadataCache = new Dictionary<string, MetadataResult>();
 
+            // One lookup per unique movie+region per run. The same movie can appear in several
+            // lists, and lists can deliberately use different countries.
+            var regionalReleaseDateCache = new Dictionary<string, RegionalReleaseDates?>(StringComparer.OrdinalIgnoreCase);
+
             // Maps a YouTube trailer key to the first local file downloaded for it this run, so
             // the same trailer is fetched once and copied to every other folder that needs it.
             var trailerPathCache = new Dictionary<string, string>();
@@ -160,7 +165,20 @@ namespace ComingSoonPlugin.ScheduledTasks
                 {
                     foreach (var movie in rawMovies)
                     {
-                        var resolvedDate = RadarrService.ResolveDate(movie, list.MovieDateType);
+                        RegionalReleaseDates? regionalDates = null;
+                        if (movie.TmdbId.HasValue && !string.IsNullOrWhiteSpace(config.TmdbApiKey))
+                        {
+                            var region = NormalizeRegion(list.ReleaseDateRegion);
+                            var cacheKey = $"{movie.TmdbId.Value}:{region}";
+                            if (!regionalReleaseDateCache.TryGetValue(cacheKey, out regionalDates))
+                            {
+                                regionalDates = await tmdbService.GetMovieReleaseDatesAsync(
+                                    movie.TmdbId.Value, region, cancellationToken).ConfigureAwait(false);
+                                regionalReleaseDateCache[cacheKey] = regionalDates;
+                            }
+                        }
+
+                        var resolvedDate = RadarrService.ResolveDate(movie, list.MovieDateType, regionalDates);
                         if (resolvedDate is null || resolvedDate.Value.Date < now || resolvedDate.Value.Date > windowEnd)
                         {
                             continue;
@@ -229,6 +247,12 @@ namespace ComingSoonPlugin.ScheduledTasks
                 config.LastBadgeRenderVersion = BadgeRenderVersion;
                 Plugin.Instance?.SaveConfiguration();
             }
+        }
+
+        private static string NormalizeRegion(string? value)
+        {
+            var region = (value ?? string.Empty).Trim().ToUpperInvariant();
+            return region.Length == 2 && region.All(char.IsLetter) ? region : "DE";
         }
 
         // Episodes are always "Upcoming"; movies get a badge matching the list's release-date type.

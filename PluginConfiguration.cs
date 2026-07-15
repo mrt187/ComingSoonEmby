@@ -46,6 +46,8 @@ namespace ComingSoonPlugin
         public string Name { get; set; } = "Coming Soon";
         public bool IncludeMovies { get; set; } = true;
         public RadarrReleaseDateType MovieDateType { get; set; } = RadarrReleaseDateType.Digital;
+        /// <summary>ISO 3166-1 country used for regional TMDB movie release dates.</summary>
+        public string ReleaseDateRegion { get; set; } = "DE";
         public bool IncludeTvShows { get; set; } = true;
     }
 
@@ -68,7 +70,7 @@ namespace ComingSoonPlugin
         /// </summary>
         public List<ComingSoonListConfig> Lists { get; set; } = new();
 
-        /// <summary>Optional - only used for local trailer download.</summary>
+        /// <summary>Optional - used for regional movie dates, trailer download and metadata fallback.</summary>
         public string TmdbApiKey { get; set; } = string.Empty;
 
         /// <summary>Badge text and fetched Overview/plot language.</summary>

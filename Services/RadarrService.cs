@@ -101,15 +101,19 @@ namespace ComingSoonPlugin.Services
         }
 
         /// <summary>Resolves a movie's "release date" for a specific list's configured date type.</summary>
-        public static DateTime? ResolveDate(CalendarItem item, RadarrReleaseDateType dateType)
+        public static DateTime? ResolveDate(
+            CalendarItem item, RadarrReleaseDateType dateType, RegionalReleaseDates? regionalDates = null)
         {
             return dateType switch
             {
-                RadarrReleaseDateType.Digital => item.DigitalReleaseDate,
-                RadarrReleaseDateType.Physical => item.PhysicalReleaseDate,
-                RadarrReleaseDateType.InCinemas => item.InCinemasDate,
-                RadarrReleaseDateType.Earliest => EarliestOf(item.InCinemasDate, item.PhysicalReleaseDate, item.DigitalReleaseDate),
-                _ => item.DigitalReleaseDate
+                RadarrReleaseDateType.Digital => regionalDates?.Digital ?? item.DigitalReleaseDate,
+                RadarrReleaseDateType.Physical => regionalDates?.Physical ?? item.PhysicalReleaseDate,
+                RadarrReleaseDateType.InCinemas => regionalDates?.InCinemas ?? item.InCinemasDate,
+                RadarrReleaseDateType.Earliest => EarliestOf(
+                    regionalDates?.InCinemas ?? item.InCinemasDate,
+                    regionalDates?.Physical ?? item.PhysicalReleaseDate,
+                    regionalDates?.Digital ?? item.DigitalReleaseDate),
+                _ => regionalDates?.Digital ?? item.DigitalReleaseDate
             };
         }
 
