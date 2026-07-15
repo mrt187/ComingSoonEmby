@@ -1,5 +1,12 @@
 [
   {
+    "Version": "1.1.3",
+    "Notes": [
+      "Episode cards now keep separate Emby identities instead of being collapsed when they belong to the same series.",
+      "Episodes released earlier on the current day are now removed at their exact Sonarr air time instead of remaining until midnight."
+    ]
+  },
+  {
     "Version": "1.1.1",
     "Notes": [
       "Regional movie lists are now strict: a missing date for the selected country and release type no longer falls back to a foreign Radarr date.",

@@ -60,9 +60,9 @@ namespace ComingSoonPlugin.Services
             int daysAhead,
             CancellationToken cancellationToken)
         {
-            var now = DateTime.UtcNow.Date;
-            var start = now;
-            var end = now.AddDays(daysAhead);
+            var now = DateTime.UtcNow;
+            var start = now.Date;
+            var end = start.AddDays(daysAhead);
 
             var url = $"{baseUrl.TrimEnd('/')}/api/v3/calendar" +
                       $"?start={start:yyyy-MM-dd}&end={end:yyyy-MM-dd}" +
@@ -78,7 +78,10 @@ namespace ComingSoonPlugin.Services
             var episodes = JsonSerializer.Deserialize<List<SonarrEpisodeDto>>(json, JsonOptions) ?? new List<SonarrEpisodeDto>();
 
             var results = episodes
-                .Where(e => e.AirDateUtc.HasValue)
+                // Sonarr's calendar query works with whole dates and therefore also returns
+                // episodes that aired earlier today. Compare the full UTC timestamp so an
+                // episode disappears as soon as its actual release time has passed.
+                .Where(e => e.AirDateUtc.HasValue && e.AirDateUtc.Value > now)
                 .Select(e => new CalendarItem
                 {
                     Type = CalendarItemType.Episode,

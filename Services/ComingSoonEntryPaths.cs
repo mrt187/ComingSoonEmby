@@ -15,7 +15,10 @@ namespace ComingSoonPlugin.Services
 
             var stableId = tmdbId.HasValue
                 ? $"tmdb-{tmdbId}"
-                : $"tvdb-{tvdbId}-s{seasonNumber}e{episodeNumber}";
+                // Do not use Emby's recognised "tvdb-<id>" folder syntax here. TvdbId is the
+                // parent series id, not an episode id; using it made every episode look like the
+                // same Movie to Emby and caused home-screen rows to collapse them into one card.
+                : $"comingsoon-series-{tvdbId}-s{seasonNumber}e{episodeNumber}";
 
             return SafeFileName($"{displayTitle} [{stableId}]");
         }

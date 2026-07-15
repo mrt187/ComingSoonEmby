@@ -8,7 +8,7 @@ from Radarr and Sonarr.
 - Emby Server 4.9.5 Stable
 - Emby Server 4.10 Beta
 
-Version 1.1.1 is built against Emby 4.9.5 and tested on Emby 4.10 Beta.
+Version 1.1.3 is built against Emby 4.9.5 and tested on Emby 4.10 Beta.
 
 ## How it works
 

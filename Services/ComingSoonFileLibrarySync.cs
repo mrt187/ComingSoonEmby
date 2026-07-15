@@ -246,7 +246,10 @@ namespace ComingSoonPlugin.Services
             }
 
             // <movie> root even for series entries - the S/E badge is already burned into the
-            // poster, so a full Series/Season/Episode NFO hierarchy isn't needed here.
+            // poster, so a full Series/Season/Episode NFO hierarchy isn't needed here. Episode
+            // cards are locked because their series-level metadata was already embedded above;
+            // allowing Emby to identify these fake movies would assign the same parent-series
+            // TVDB id to every episode and collapse them into a single home-screen card.
             var root = new XElement(
                 "movie",
                 new XElement("title", title),
@@ -254,21 +257,17 @@ namespace ComingSoonPlugin.Services
                 new XElement("tagline", tagline),
                 new XElement("plot", string.IsNullOrWhiteSpace(item.Overview) ? defaultPlot : item.Overview),
                 new XElement("genre", "Coming Soon"),
-                // Unlocked: the uniqueid below lets Emby's own configured metadata provider
-                // (TheMovieDb/TheTVDB) fetch cast/crew itself during the normal library scan, no
-                // TMDB key on our side required. poster.jpg/backdrop.jpg are unaffected by that -
-                // see BuildLibraryOptions, which blocks online image fetchers for this library.
-                new XElement("lockdata", "false"));
+                new XElement("lockdata", item.Type == CalendarItemType.Episode ? "true" : "false"));
 
             if (item.TmdbId.HasValue)
             {
                 root.Add(new XElement("uniqueid", new XAttribute("type", "tmdb"), item.TmdbId.Value));
             }
 
-            if (item.TvdbId.HasValue)
-            {
-                root.Add(new XElement("uniqueid", new XAttribute("type", "tvdb"), item.TvdbId.Value));
-            }
+            // TvdbId on CalendarItem identifies the parent series, not the individual episode.
+            // Never write it as this movie-shaped entry's provider id; Emby derives its
+            // PresentationUniqueKey from provider ids and would treat all episodes as versions
+            // of the same item.
 
             foreach (var castMember in item.Cast)
             {
@@ -307,7 +306,8 @@ namespace ComingSoonPlugin.Services
                 // A failed calendar request is not an empty calendar. Preserve entries belonging
                 // to that source until a later refresh successfully confirms that they are stale.
                 var isMovie = name.Contains("[tmdb-", StringComparison.OrdinalIgnoreCase);
-                var isEpisode = name.Contains("[tvdb-", StringComparison.OrdinalIgnoreCase);
+                var isEpisode = name.Contains("[tvdb-", StringComparison.OrdinalIgnoreCase)
+                    || name.Contains("[comingsoon-series-", StringComparison.OrdinalIgnoreCase);
                 if ((isMovie && !removeStaleMovies) || (isEpisode && !removeStaleEpisodes))
                 {
                     _logger.LogDebug("Coming Soon: preserving {Name} because its source fetch failed", name);
