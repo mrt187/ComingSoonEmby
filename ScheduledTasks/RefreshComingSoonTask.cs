@@ -179,6 +179,13 @@ namespace ComingSoonPlugin.ScheduledTasks
                         }
 
                         var resolvedDate = RadarrService.ResolveDate(movie, list.MovieDateType, regionalDates);
+                        if (resolvedDate is null && regionalDates is not null)
+                        {
+                            _logger.LogDebug(
+                                "Coming Soon: no {DateType} date for '{Title}' in region {Region}; omitted from list '{List}'",
+                                list.MovieDateType, movie.Title, NormalizeRegion(list.ReleaseDateRegion), list.Name);
+                        }
+
                         if (resolvedDate is null || resolvedDate.Value.Date < now || resolvedDate.Value.Date > windowEnd)
                         {
                             continue;

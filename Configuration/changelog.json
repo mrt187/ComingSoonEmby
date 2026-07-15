@@ -1,5 +1,12 @@
 [
   {
+    "Version": "1.1.1",
+    "Notes": [
+      "Regional movie lists are now strict: a missing date for the selected country and release type no longer falls back to a foreign Radarr date.",
+      "Radarr fallback remains available when no TMDB key is configured or the regional TMDB request fails technically."
+    ]
+  },
+  {
     "Version": "1.1.0",
     "Notes": [
       "Adds a configurable movie release region to every list (Germany by default).",

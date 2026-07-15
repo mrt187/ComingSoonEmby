@@ -104,16 +104,31 @@ namespace ComingSoonPlugin.Services
         public static DateTime? ResolveDate(
             CalendarItem item, RadarrReleaseDateType dateType, RegionalReleaseDates? regionalDates = null)
         {
+            // A non-null regional result means TMDB answered successfully for the requested
+            // country. In that case stay strictly regional: a missing date must not silently be
+            // replaced with Radarr's commonly US-focused value. Null means regional lookup was
+            // unavailable (no key or a technical failure), where Radarr remains the safe fallback.
+            if (regionalDates is not null)
+            {
+                return dateType switch
+                {
+                    RadarrReleaseDateType.Digital => regionalDates.Digital,
+                    RadarrReleaseDateType.Physical => regionalDates.Physical,
+                    RadarrReleaseDateType.InCinemas => regionalDates.InCinemas,
+                    RadarrReleaseDateType.Earliest => EarliestOf(
+                        regionalDates.InCinemas, regionalDates.Physical, regionalDates.Digital),
+                    _ => regionalDates.Digital
+                };
+            }
+
             return dateType switch
             {
-                RadarrReleaseDateType.Digital => regionalDates?.Digital ?? item.DigitalReleaseDate,
-                RadarrReleaseDateType.Physical => regionalDates?.Physical ?? item.PhysicalReleaseDate,
-                RadarrReleaseDateType.InCinemas => regionalDates?.InCinemas ?? item.InCinemasDate,
+                RadarrReleaseDateType.Digital => item.DigitalReleaseDate,
+                RadarrReleaseDateType.Physical => item.PhysicalReleaseDate,
+                RadarrReleaseDateType.InCinemas => item.InCinemasDate,
                 RadarrReleaseDateType.Earliest => EarliestOf(
-                    regionalDates?.InCinemas ?? item.InCinemasDate,
-                    regionalDates?.Physical ?? item.PhysicalReleaseDate,
-                    regionalDates?.Digital ?? item.DigitalReleaseDate),
-                _ => regionalDates?.Digital ?? item.DigitalReleaseDate
+                    item.InCinemasDate, item.PhysicalReleaseDate, item.DigitalReleaseDate),
+                _ => item.DigitalReleaseDate
             };
         }
 
